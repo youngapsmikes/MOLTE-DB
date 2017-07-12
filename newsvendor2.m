@@ -1,4 +1,4 @@
-function [y,profit] = newsvendor2(numTruth, steprule)
+function [y,profit] = newsvendor2(varargin)
 % newsvendor problem with demand exponentially distributed and price much
 % larger than cost 
 
@@ -9,6 +9,8 @@ function [y,profit] = newsvendor2(numTruth, steprule)
 % Output:
 % y: vector of estimates of our optimal demand 
 
+steprule = varargin{1};
+numTruth = varargin{2};
 
 % initialization of newsvendor problem parameters 
 c = 100; % cost of newspaper
@@ -118,7 +120,7 @@ gradFvect = zeros(1, N);
         K = newk;    
      end 
      
-     if k ~= 5
+     if namerule ~= string('BAKF')
         x = x + alpha*gradF;
      end 
      
