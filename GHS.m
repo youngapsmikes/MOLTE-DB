@@ -8,13 +8,16 @@ function [alpha] = GHS(alphanought, a, n)
 
 % Input: 
 % a - tuning parameter 
-% alphanought - scaling factor 
+% alphanought - stepsize/learning rate 
 % n - iteration number 
 if (n == 0) 
     error('N must be greater than zero');
 end 
+if (a == 0 || alphanought == 0) 
+    error('theta and alphanought cannot equal zero');
+end 
     
-alpha = alphanought * (a/(a + n - 1));
+    alpha = alphanought * (a/(a + n - 1));
     
 end 
 
