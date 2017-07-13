@@ -1,5 +1,5 @@
 % INPUT:
-% spreedsheet - the file name of the spreedsheet that contains different c
+% spreedsheet - the file name of the spreedsheet that contains different 
 %             problem classes
 %
 
