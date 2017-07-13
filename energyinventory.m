@@ -1,4 +1,8 @@
 
+
+% given batter storage pricing data find optimal set of sell/buy prices 
+% such that profit is maximized
+
 function [maxtheta, maxprofit] = energyinventory(steprule, numrestart)
 
 % kestens 
@@ -101,6 +105,8 @@ end
 
 
 end 
+
+% compute numerical gradient 
 function gradient = getgradF(theta, prices)
     delta = 5; 
     gradient = zeros(2,1);
@@ -116,6 +122,7 @@ function gradient = getgradF(theta, prices)
     gradient(2) = gradFb;
 end 
 
+% get profit 
 function [F, finalprofit] = getF(theta, prices) 
     
     T = size(prices,1); %% simulate for # iterations equal to # prices
@@ -172,7 +179,7 @@ function findecision = getDecision(price, sellprice, buyprice, R)
     findecision = decision;
     
 end 
-
+% generate a random set of sell/buy prices 
 function randtheta = getRandom() 
 
     thetas = randi([10, 100]);
