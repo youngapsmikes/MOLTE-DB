@@ -1,6 +1,6 @@
 
 
-% given batter storage pricing data find optimal set of sell/buy prices 
+% given battery storage pricing data find optimal set of sell/buy prices 
 % such that profit is maximized
 
 function [maxtheta, maxprofit] = energyinventory(steprule, numrestart)
