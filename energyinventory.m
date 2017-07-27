@@ -3,59 +3,123 @@
 % given battery storage pricing data find optimal set of sell/buy prices 
 % such that profit is maximized
 
-function [maxtheta, maxprofit] = energyinventory(steprule, numrestart)
+function [maxtheta, MAX] = energyinventory(varargin)
 
-% kestens 
-prevgradF = 1;
-gradterm = 1;
-kestenalpha = .0001; 
-kestentheta = 10; 
+addpath('StepPolicies');
 
+numrestart = 5; % number of random restarts 
 
-% initialize parameters for adam
-beta1 = 0.95;
-beta2 = 0.95;
-mpast = 0;
-vpast = 0;
+steprule = varargin{1};
+numIterations = varargin{2};
+tuneparam = varargin{3};  
+
 epsilon = 1e-8;
-gradF = 1;
 
-% initialize parameters for adagrad 
-adagradstepsize = .001;
+namerule = func2str(steprule);
+
+switch(namerule)
+    % initialize parameters for adam
+    case 'adam'
+    mpast = 0;
+    vpast = 0;
+    gradF = 1;
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            alphanought = tuneparam(1);
+        else 
+            alphanought = 0.0001;
+        end 
+        if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
+            beta1 = tuneparam(2);
+        else 
+            beta1 = 0.95;
+        end 
+        if(tuneparam(3) ~= 0 && ~isnan(tuneparam(3)))
+            beta2 = tuneparam(3);
+        else 
+            beta2 = 0.95;
+        end 
+    case 'adagrad'
+        % initialize parameters for adagad
+        % adagradstepsize = 30;
+        gradF = 1;
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            adagradstepsize = tuneparam(1);
+        else 
+            adagradstepsize = .001;
+        end 
+    
+    case 'GHS'
+        % initialize parameters for GHS
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            GHSalpha = tuneparam(1);
+        else 
+            GHSalpha = .00001;
+        end 
+        if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
+            GHStheta = tuneparam(2);
+        else 
+            GHStheta = 1;
+        end 
+   case 'polylearning'
+        % initialize parameters for Polynomial learning rates 
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            Polyalpha = tuneparam(1);
+        else 
+            Polyalpha = .0001;
+        end 
+        if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
+            Polybeta = tuneparam(2);
+        else 
+            Polybeta = 0.8;
+        end 
+  case 'kestens'
+        % initialize parameters for Kestens 
+        K = 0;
+        prevgradF = 1;
+        gradterm = 1;
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            kestenalpha = tuneparam(1);
+        else 
+            kestenalpha = .001;
+        end 
+        if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
+            kestentheta = tuneparam(2);
+        else 
+            kestentheta = 10;
+        end 
+
+end 
 
 
-maxprofit = 0;
+maxprofit = -inf;
 maxtheta = zeros(1,2)';
 prices = findprices();
 
 gradvect = zeros(2,1); % initialize gradient vector  
 prevgrad = [1, 1];
 
-
+N = numIterations;
 
 
 for k = 1:numrestart
     
-N = 100;
 
 theta = getRandom()'; % initialize theta_S, theta_B
 
 thetas = zeros(1, N);
 thetab = zeros(1, N);
-for i = 1:N
-    
-    namerule = func2str(steprule);  
+for i = 1:N 
     % GHS 
     if namerule == string('GHS')
-        a = steprule(.00001, 1, i);
+        a = steprule(GHSalpha, GHStheta, i);
     end 
     % adam
     if namerule == string('adam')
-        a = adam(i, .0001, beta1, beta2, mpast, vpast, gradF,epsilon); 
+        a = adam(i, alphanought, beta1, beta2, mpast, vpast, gradF,epsilon); 
     end 
     % polyomial learning
     if namerule == string('polylearning')
-        a = polylearning(.0001, i, 0.8);
+        a = polylearning(Polyalpha, i, Polybeta);
     end 
     % adagrad
     if namerule == string('adagrad')
@@ -99,11 +163,9 @@ end
         maxprofit = profittry; 
         maxtheta = thetatry;
     end 
-    
-    
 end 
-
-
+    
+    MAX = maxprofit;
 end 
 
 % compute numerical gradient 
