@@ -1,8 +1,8 @@
-function [cumReward, profit] = MLE(varargin)
+function [cumReward, profit] = MLE1(varargin)
 
 addpath('StepPolicies');
 
-% MLE problem class with one parameter
+% MLE problem class with two  parameters
 % Input: steprule, numIterations, vector of tunable parameters for the 
 % stepsizes, and number of sample paths 
 
@@ -29,7 +29,7 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             alphanought = tuneparam(1);
         else 
-            alphanought = 0.00004;
+            alphanought = 0.00002;
         end 
         if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
             beta1 = tuneparam(2);
@@ -39,7 +39,7 @@ switch(namerule)
         if(tuneparam(3) ~= 0 && ~isnan(tuneparam(3)))
             beta2 = tuneparam(3);
         else 
-            beta2 = 0.95;
+            beta2 = 0.80;
         end 
     % initialize parameters for adagad
     case 'adagrad'
@@ -47,7 +47,7 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             adagradstepsize = tuneparam(1);
         else 
-            adagradstepsize = .0001;
+            adagradstepsize = .000025;
         end 
 
     % initialize parameters for GHS
@@ -55,7 +55,7 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             GHSalpha = tuneparam(1);
         else 
-            GHSalpha = .018;
+            GHSalpha = .01;
         end 
         if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
             GHStheta = tuneparam(2);
@@ -83,19 +83,19 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             kestenalpha = tuneparam(1);
         else 
-            kestenalpha = .0003;
+            kestenalpha = .0004;
         end 
         if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
             kestentheta = tuneparam(2);
         else 
-            kestentheta = 10;
+            kestentheta = 30;
         end 
 
 end 
 
 
 % initialization of variables 
-original = 10;
+original = [10, 50];
 theta = original'; % values of initial parameters 
 numparams = size(original, 2);
 data = zeros(numIterations, numparams); %data matrix  
@@ -106,7 +106,6 @@ profit = zeros(1, numPaths); %% -(1) * err
 cumReward = zeros(1, numPaths); %% sum of the MSEs for each sample path
 epsilon = 1e-8; % error term for stepsizes 
 
-
 % for each sample path
 for path = 1:numPaths 
 
@@ -114,6 +113,7 @@ for path = 1:numPaths
     % for a particular sample path, keep track of the MSE at each 
     % iteration
     F = zeros(1, numIterations); 
+    Objective = zeros(1,numIterations);
 
     % generate data 
     xvect = zeros(1, numparams)';
@@ -171,10 +171,12 @@ for path = 1:numPaths
                 gradterm = computeGrad(fvalues(k), data(k, :), est, i);
                 prevgradF = gradterm;
                 est(i) = est(i) + a*gradterm;
-                F(k) = immse(original',est); 
+  
+                
 %                 estvect(path*k, i) = est(i);
             end
-
+            Objective(k) = dot(data(k,:), est); 
+              F(k) = immse(original',est); 
 %            funct(path*k) = dot(data(k, :), est); 
             cumReward(1, path) = cumReward(1, path) + immse(original',est);
         end 

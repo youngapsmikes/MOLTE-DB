@@ -20,7 +20,7 @@ numPaths = varargin{4};
 c = 100; % cost of newspaper
 p = 200; % price of newspaper
 mu = 120; % mean of demand distribution 
-sigma = 50; % variance of demand distribution 
+sigma = 20; % variance of demand distribution 
 grad = @vanillanewsvendorgrad; % gradient 
 epsilon = 1e-8;
 
@@ -58,7 +58,7 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             alphanought = tuneparam(1);
         else 
-            alphanought = 0.5;
+            alphanought = .2;
         end 
         if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
             beta1 = tuneparam(2);
@@ -68,7 +68,7 @@ switch(namerule)
         if(tuneparam(3) ~= 0 && ~isnan(tuneparam(3)))
             beta2 = tuneparam(3);
         else 
-            beta2 = 0.95;
+            beta2 = 0.80;
         end 
 
         mpast = 15;
@@ -80,7 +80,7 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             adagradstepsize = tuneparam(1);
         else 
-            adagradstepsize = 30;
+            adagradstepsize = 60;
         end 
     
     case 'GHS'
@@ -102,12 +102,12 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             Polyalpha = tuneparam(1);
         else 
-            Polyalpha = 2;
+            Polyalpha = .5;
         end 
         if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
             Polybeta = tuneparam(2);
         else 
-            Polybeta = 0.8;
+            Polybeta = 0.9;
         end 
   case 'kestens'
         % initialize parameters for Kestens 
@@ -117,12 +117,12 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             kestenalpha = tuneparam(1);
         else 
-            kestenalpha = 1;
+            kestenalpha = 10;
         end 
         if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
             kestentheta = tuneparam(2);
         else 
-            kestentheta = 10;
+            kestentheta = 30;
         end 
 
 end 
@@ -142,17 +142,16 @@ F = zeros(1, N); % profit vector for a single sample path
 gradF = 1;
 gradFvect = zeros(1, N);
 
-
   
 % iterate through one sample path
     for j = 1:N
 
      w = normrnd(mu, sigma); % distribution of demand 
 
-     F(j) = p*min(x, w) - c*x;
+     F(j) = p*min(x, w) - c*x; % compute profit 
      cumaward(i) = cumaward(i) + F(j);
      prevgradF = gradF;
-     gradF = grad(w, x, p, c);
+     gradF = grad(w, x, p, c); % get gradient 
      gradFvect(j) = gradF;
      xprev = x;
 
@@ -171,8 +170,8 @@ gradFvect = zeros(1, N);
      % adagrad 
      if namerule == string('adagrad')
         if (j == 1) 
-            histgrad = zeros(1, 1);
-            [alpha, g] = steprule(adagradstepsize, gradF,histgrad, 1, epsilon, 1);
+            histgrad = 0;
+            [alpha, g] = steprule(adagradstepsize, gradF, histgrad, 1, epsilon, 1);
             histgrad = g;
         else 
         [alpha, g] = steprule(adagradstepsize, gradF, histgrad, 1, epsilon, 1);
@@ -208,4 +207,5 @@ gradFvect = zeros(1, N);
         profit(i) = finprofit; 
 end
     finalcumulative = cumaward; 
+%     plot(F);
 end 

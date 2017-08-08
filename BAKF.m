@@ -15,7 +15,7 @@ function[alpha, beta, v, lambda] = BAKF(iter, x, xprev, nu, beta, v, lambda, a)
 end 
 
 function [beta1,v1,var1,lambda1] = updateStats(theta, prevtheta, nu, beta, v, lambda, a)
-
+   
     epsilon = prevtheta - theta;
     beta1 = (1-nu)*beta + nu*epsilon;
     v1 = (1-nu)*v + nu*epsilon*epsilon;

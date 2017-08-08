@@ -1,6 +1,6 @@
-function [y,profit] = newsvendor3(varargin)
-% newsvendor problem with demand exponentially distributed and price close
-% to cost 
+function [finalcumulative, profit] = newsvendor3(varargin)
+% newsvendor problem with demand exponentially distributed and price much
+% larger than cost 
 
 % Input:
 % numTruth: number of times to run one sample path of newsvendor simulation 
@@ -8,56 +8,132 @@ function [y,profit] = newsvendor3(varargin)
 
 % Output:
 % y: vector of estimates of our optimal demand 
+addpath('StepPolicies');
 
 steprule = varargin{1};
-numTruth = varargin{2};
+numIterations = varargin{2};
+tuneparam = varargin{3};
+numPaths = varargin{4};
+% numPaths = 5;
 
 % initialization of newsvendor problem parameters 
 c = 100; % cost of newspaper
-p = 200; % price of newspaper
+p = 120; % price of newspaper
+mu = 120; % mean of demand distribution 
+% sigma = 20; % variance of demand distribution 
 grad = @vanillanewsvendorgrad; % gradient 
-N = 200; % number of iterations in one sample path
-mu = 120; % mean of exponential distribution 
-
-% initialize parameters for BAKF
-nu = .1;
-v = 1; 
-beta = .05;
-lambda = 1;
-BAKFalpha = 1; % initial estimate for alpha for BAKF
-alpha = 1;
-
-% initialize parameters for adam
-alphanought = .5; 
-beta1 = 0.95;
-beta2 = 0.95;
-mpast = 15;
-vpast = 10;
 epsilon = 1e-8;
 
+namerule = func2str(steprule);
 
-% initialize parameters for adagad
-adagradstepsize = 120;
+switch(namerule) 
+    % initialize parameters for BAKF
+    case 'BAKF'
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            lambda = tuneparam(1);
+        else 
+            lambda = 1;
+        end 
+        if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
+            BAKFalpha = tuneparam(2);
+        else 
+            BAKFalpha = 1;
+        end 
+        if(tuneparam(3) ~= 0 && ~isnan(tuneparam(3)))
+            alpha = tuneparam(3);
+        else 
+            alpha = 1;
+        end 
+        nu = .1;
+        v = 1; 
+        beta = .05;
+%         lambda = 1;
+%         BAKFalpha = 1; % initial estimate for alpha for BAKF
+%         alpha = 1;
+    case 'adam'
+        % initialize parameters for adam
+        % alphanought = .5; 
+        % beta1 = 0.95;
+        % beta2 = 0.95;
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            alphanought = tuneparam(1);
+        else 
+            alphanought = .2;
+        end 
+        if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
+            beta1 = tuneparam(2);
+        else 
+            beta1 = 0.95;
+        end 
+        if(tuneparam(3) ~= 0 && ~isnan(tuneparam(3)))
+            beta2 = tuneparam(3);
+        else 
+            beta2 = 0.80;
+        end 
 
-% initialize parameters for GHS
-GHSalpha = 10;
-GHStheta = 1;
-
-% initialize parameters for Polynomial learning rates 
-Polyalpha = 2;
-Polybeta = 0.8;
-
-% initialize parameters for Kestens 
-K = 0;
-kestenalpha = 1;
-kestentheta = 10;
-
-
-
-for i = 1:numTruth
+        mpast = 15;
+        vpast = 10;
+        
+    case 'adagrad'
+        % initialize parameters for adagad
+        % adagradstepsize = 30;
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            adagradstepsize = tuneparam(1);
+        else 
+            adagradstepsize = 60;
+        end 
     
-profit = zeros(1, numTruth);
+    case 'GHS'
+        % initialize parameters for GHS
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            GHSalpha = tuneparam(1);
+        else 
+            GHSalpha = 30;
+        end 
+        if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
+            GHStheta = tuneparam(2);
+        else 
+            GHStheta = 1;
+        end 
+   case 'polylearning'
+        % initialize parameters for Polynomial learning rates 
+        % Polyalpha = 2;
+        % Polybeta = 0.8;
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            Polyalpha = tuneparam(1);
+        else 
+            Polyalpha = 30;
+        end 
+        if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
+            Polybeta = tuneparam(2);
+        else 
+            Polybeta = 0.9;
+        end 
+  case 'kestens'
+        % initialize parameters for Kestens 
+        K = 0;
+        % kestenalpha = 1;
+        % kestentheta = 10;
+        if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
+            kestenalpha = tuneparam(1);
+        else 
+            kestenalpha = 60;
+        end 
+        if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
+            kestentheta = tuneparam(2);
+        else 
+            kestentheta = 50;
+        end 
 
+end 
+
+N = numIterations;
+
+profit = zeros(1, numPaths);
+cumaward = zeros(1, numPaths);
+
+for i = 1:numPaths
+    
 % initialization of variables 
 x = 0; 
 y = zeros(1, N); % vector of estimates of parameter 
@@ -66,20 +142,19 @@ F = zeros(1, N); % profit vector for a single sample path
 gradF = 1;
 gradFvect = zeros(1, N);
 
-
   
 % iterate through one sample path
     for j = 1:N
 
      w = exprnd(mu); % distribution of demand 
 
-     F(j) = p*min(x, w) - c*x;
+     F(j) = p*min(x, w) - c*x; % compute profit 
+     cumaward(i) = cumaward(i) + F(j);
      prevgradF = gradF;
-     gradF = grad(w, x, p, c);
+     gradF = grad(w, x, p, c); % get gradient 
      gradFvect(j) = gradF;
      xprev = x;
 
-     namerule = func2str(steprule);
      % ADAM
      if namerule == string('adam')
         alpha = steprule(j, alphanought, beta1, beta2, mpast, vpast, gradF, epsilon);
@@ -95,8 +170,8 @@ gradFvect = zeros(1, N);
      % adagrad 
      if namerule == string('adagrad')
         if (j == 1) 
-            histgrad = zeros(1, 1);
-            [alpha, g] = steprule(adagradstepsize, gradF,histgrad, 1, epsilon, 1);
+            histgrad = 0;
+            [alpha, g] = steprule(adagradstepsize, gradF, histgrad, 1, epsilon, 1);
             histgrad = g;
         else 
         [alpha, g] = steprule(adagradstepsize, gradF, histgrad, 1, epsilon, 1);
@@ -131,6 +206,6 @@ gradFvect = zeros(1, N);
         finprofit = F(N);
         profit(i) = finprofit; 
 end
-
-
+    finalcumulative = cumaward; 
+%      plot(F);
 end 

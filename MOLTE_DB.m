@@ -3,7 +3,7 @@
 %             problem classes
 %
 
-spreadsheet= 'Test.xlsx';
+spreadsheet= 'DerivativeBased.xlsx';
 [ndata, text, alldata] = xlsread(spreadsheet,'','','basic');
 [numPPp, numA]=size(ndata);
 numPP=numPPp;
@@ -17,8 +17,11 @@ for problemi = 1:numPP
 
 % problem = alldata{2, 1};
 problem = alldata{problemi+1, 1}; 
-numSim = alldata{problemi+1, 2}; 
-problemtype = alldata{problemi+1, 3};
+numSim = alldata{problemi+1, 2}; % number of iterations for a particular
+% problem class 
+
+% get problem class 
+problemtype = alldata{problemi+1, 3}; 
 
 % numberofpolicies=alldata{2,2};
 numberofpolicies=alldata{problemi+1,4};
@@ -62,6 +65,8 @@ for jjj=1:numberofpolicies % find out the policies name and whether they need to
 
 end
 
+% for running time purposes, we only do one sample path of energy inventory
+
 if strcmp(problem, 'energyinventory')
     profitmatrix = zeros(numberofpolicies, 2);
 else 
@@ -69,6 +74,8 @@ else
 end 
 
 % loop through the stepsize rules 
+% get the profit and cumreward 
+% for MLE, this profit is -1 * the MSE 
 for i=1:numberofpolicies
 
     if contains(pol(i), 'adam')
@@ -89,7 +96,7 @@ for i=1:numberofpolicies
     end
     if contains(pol(i), 'polylearning') 
         [cumreward, profit] = problemclass(@polylearning, numSim, alpha(:,i), numPaths);
-        disp(profit);
+%         disp(profit);
         if strcmp(problemtype, 'online') && ~contains(problem, 'energyinventory')
             profitmatrix(i,:)= cumreward;
         else
@@ -98,7 +105,7 @@ for i=1:numberofpolicies
     end
     if contains(pol(i), 'adagrad')
        [cumreward, profit] = problemclass(@adagrad, numSim, alpha(:,i), numPaths);
-        disp(profit);
+%         disp(profit);
        if strcmp(problemtype, 'online') && ~contains(problem, 'energyinventory')
             profitmatrix(i,:)= cumreward;
         else
@@ -107,7 +114,7 @@ for i=1:numberofpolicies
     end
     if contains(pol(i), 'BAKF')
        [cumreward, profit] = problemclass(@BAKF, numSim, alpha(:,i), numPaths);
-        disp(profit);
+%         disp(profit);
         if strcmp(problemtype, 'online') && ~contains(problem, 'energyinventory')
             profitmatrix(i,:)= cumreward;
         else
@@ -116,7 +123,7 @@ for i=1:numberofpolicies
     end
     if contains(pol(i), 'kestens')
         [cumreward, profit] = problemclass(@kestens, numSim, alpha(:,i), numPaths);
-        disp(profit);
+%         disp(profit);
         if strcmp(problemtype, 'online') && ~contains(problem, 'energyinventory')
             profitmatrix(i,:)= cumreward;
         else
@@ -173,6 +180,6 @@ if contains(problem, 'energyinventory')
    ylim([0 1]);
 end
 colormap (color);
-legend(remainingPolicies);
+legend(remainingPolicies, 'Location', 'best');
 
 end 

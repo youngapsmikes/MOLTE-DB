@@ -17,8 +17,8 @@ if (a == 0 || alphanought == 0)
     error('theta and alphanought cannot equal zero');
 end 
     
-    alpha = alphanought * (a/(a + n - 1));
-    
+      alpha = alphanought * (1/(a + n - 1));
+%     alpha = alphanought * (a/(a + n - 1));
 end 
 
 

@@ -16,6 +16,7 @@ function [alpha, newK] = kestens(alphanought,theta, K, prevgradF,gradF)
     if (dot(gradF, prevgradF) < 0) K = K + 1;
     end 
     
-    alpha = alphanought * (theta)/(theta + K - 1);
+%     alpha = alphanought * (theta)/(theta + K - 1);
+    alpha = alphanought * 1 /(theta + K - 1);
     newK = K;
 end
