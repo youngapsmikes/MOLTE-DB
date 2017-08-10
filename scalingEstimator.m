@@ -7,10 +7,12 @@ function [finalalpha] = scalingEstimator()
     
     alphanought = 1;
     scalingfactor = 2;
-
-%     [~,~,gradvect]= problem(100, 200, 10, alphanought, 120, 50, @vanillanewsvendorgrad, @polylearning, 3); 
+    params = zeros(1, 2); 
+    params(1) = 1;
+    params(2) = 0.8;
     
-    [~, gradvect] = linearmodel(1, 10, alphanought);
+                   
+    [~,~, gradvect] = newsvendorgradient(@polylearning, 10,params, 1);
     toosmall = compareGrad(gradvect);
      
      % if stepsize of 1 is initially too small
@@ -20,27 +22,13 @@ function [finalalpha] = scalingEstimator()
         while(toosmall == true && count < 8) 
             disp('from toosmall');
             % pass in alphatry and obtain gradient 
-%             [~,~, ~,gradvect] = problem(100, 200, 10, alphatry, 120, 10, @vanillanewsvendorgrad, @polylearning, 3); 
-            [~, gradvect] = linearmodel(1, 10, alphatry);
-            disp(gradvect);
+            [~, ~, gradvect] = newsvendorgradient(@GHS, 10, params, 1);
             toosmall = compareGrad(gradvect);
             alphatry = alphatry*scalingfactor;
-            disp(alphatry);
+            params(1) = alphatry;
+%             disp(alphatry);
             count = count + 1;
         end
-        
-%         count = 0;
-        
-%         while(toosmall == false && count < 8) 
-%             % pass in alphatry and obtain gradient 
-% %             [~,~, ~,gradvect] = problem(100, 200, 10, alphatry, 120, 10, @vanillanewsvendorgrad, @polylearning, 3); 
-%             [~, gradvect] = linearmodel(1, 10, alphatry);
-% %             disp(gradvect);
-%             toosmall = compareGrad(gradvect);
-%             alphatry = alphatry*scalingfactor;
-%             count = count + 1;
-%         end
-%         
         
     % if stepsize of 1 is initially too large
      else 
@@ -50,11 +38,12 @@ function [finalalpha] = scalingEstimator()
             disp('from too large');
             % pass in alphatry and obtain gradient 
 %             [~,~,~,gradvect] = problem(200, 600, 10, alphatry, 120, 50, @vanillanewsvendorgrad, @polylearning, 3); 
-            [~, gradvect] = linearmodel(1, 10, alphatry);
+            [~, gradvect] = newsvendorgradient(@GHS, 10, params, 1);
 %             disp(gradvect);
             toosmall = compareGrad(gradvect);
             alphatry = alphatry/scalingfactor;
-            disp(alphatry);
+            params(1) = alphatry; 
+%             disp(alphatry);
             count = count + 1;
         end
 %         disp(count);
@@ -67,30 +56,18 @@ function [finalalpha] = scalingEstimator()
                 disp('from second toosmall');
                 % pass in alphatry and obtain gradient 
 %             [~,~,~,gradvect] = problem(200, 600, 10, alphatry, 120, 50, @vanillanewsvendorgrad, @polylearning, 3); 
-                [~, gradvect] = linearmodel(1, 10, alphatry);
-%             disp(gradvect);
+%                 [~, gradvect] = linearmodel(1, 10, alphatry);
+               [~, gradvect] = newsvendorgradient(@GHS, 10, params,1);
                 toosmall = compareGrad(gradvect);
                 alphatry = alphatry*scalingfactor;
-                disp(alphatry);
+                params(1) = alphatry;
+%                 disp(alphatry);
                 count = count + 1;
             end
-%             disp(count);
-%         end 
-    end 
-        
-%         count = 0;
-%         while (toosmall ~= false && count < 8) 
-%             gradvect = linearmodel(1, 200);
-%             toosmall = compareGrad(gradvect);
-%             alphatry = alphanought*scalingfactor;
-%             count = count + 1;
-%         end         
+    end       
     finalalpha = alphatry;
     end 
 
-
-    
-    
 function toosmall = compareGrad(gradvect)
 
     N = size(gradvect, 2); 
