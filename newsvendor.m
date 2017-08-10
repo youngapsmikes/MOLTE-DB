@@ -14,7 +14,6 @@ steprule = varargin{1};
 numIterations = varargin{2};
 tuneparam = varargin{3};
 numPaths = varargin{4};
-% numPaths = 5;
 
 % initialization of newsvendor problem parameters 
 c = 100; % cost of newspaper
@@ -47,14 +46,8 @@ switch(namerule)
         nu = .1;
         v = 1; 
         beta = .05;
-%         lambda = 1;
-%         BAKFalpha = 1; % initial estimate for alpha for BAKF
-%         alpha = 1;
+    % initialize parameters for adam
     case 'adam'
-        % initialize parameters for adam
-        % alphanought = .5; 
-        % beta1 = 0.95;
-        % beta2 = 0.95;
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             alphanought = tuneparam(1);
         else 
@@ -73,18 +66,15 @@ switch(namerule)
 
         mpast = 15;
         vpast = 10;
-        
+    % initialize parameters for adagad    
     case 'adagrad'
-        % initialize parameters for adagad
-        % adagradstepsize = 30;
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             adagradstepsize = tuneparam(1);
         else 
             adagradstepsize = 60;
         end 
-    
+    % initialize parameters for GHS
     case 'GHS'
-        % initialize parameters for GHS
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             GHSalpha = tuneparam(1);
         else 
@@ -95,10 +85,8 @@ switch(namerule)
         else 
             GHStheta = 1;
         end 
-   case 'polylearning'
-        % initialize parameters for Polynomial learning rates 
-        % Polyalpha = 2;
-        % Polybeta = 0.8;
+   % initialize parameters for Polynomial learning rates 
+   case 'polylearning' 
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             Polyalpha = tuneparam(1);
         else 
@@ -109,11 +97,9 @@ switch(namerule)
         else 
             Polybeta = 0.9;
         end 
+  % initialize parameters for Kestens 
   case 'kestens'
-        % initialize parameters for Kestens 
         K = 0;
-        % kestenalpha = 1;
-        % kestentheta = 10;
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             kestenalpha = tuneparam(1);
         else 

@@ -7,10 +7,10 @@
 % a jump diffusion martingale process where: 
 % P^t+1 = P^t + .5(energycost - price) + epsilon + jumpdiffusionfactor 
 
-function [maxtheta, maxF] = energyinventoryp1(varargin)
+function [maxtheta, MAX] = energyinventoryp1(varargin)
 
 addpath('StepPolicies');
-numrestart = 50; % number of random restarts 
+numrestart = 2; % number of random restarts 
 
 steprule = varargin{1};
 numIterations = varargin{2};

@@ -29,7 +29,7 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             alphanought = tuneparam(1);
         else 
-            alphanought = 0.00002;
+            alphanought = 0.0001;
         end 
         if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
             beta1 = tuneparam(2);
@@ -47,7 +47,7 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             adagradstepsize = tuneparam(1);
         else 
-            adagradstepsize = .000025;
+            adagradstepsize = .0002;
         end 
 
     % initialize parameters for GHS
@@ -68,7 +68,7 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             Polyalpha = tuneparam(1);
         else 
-            Polyalpha = .00003;
+            Polyalpha = .00006;
         end 
         if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
             Polybeta = tuneparam(2);
@@ -83,7 +83,7 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             kestenalpha = tuneparam(1);
         else 
-            kestenalpha = .0004;
+            kestenalpha = .0008;
         end 
         if(tuneparam(2) ~= 0 && ~isnan(tuneparam(2)))
             kestentheta = tuneparam(2);
@@ -171,18 +171,14 @@ for path = 1:numPaths
                 gradterm = computeGrad(fvalues(k), data(k, :), est, i);
                 prevgradF = gradterm;
                 est(i) = est(i) + a*gradterm;
-  
-                
-%                 estvect(path*k, i) = est(i);
             end
             Objective(k) = dot(data(k,:), est); 
-              F(k) = immse(original',est); 
-%            funct(path*k) = dot(data(k, :), est); 
+              F(k) = immse(original',est);  
             cumReward(1, path) = cumReward(1, path) + immse(original',est);
         end 
       
        err(path) = immse(original', est);
-       profit(path) = immse(original', est); %% tack on a negative sign
+       profit(path) = immse(original', est); 
 end
 end
     

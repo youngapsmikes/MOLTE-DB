@@ -47,7 +47,7 @@ switch(namerule)
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             adagradstepsize = tuneparam(1);
         else 
-            adagradstepsize = .0001;
+            adagradstepsize = .0004;
         end 
 
     % initialize parameters for GHS
@@ -182,6 +182,7 @@ for path = 1:numPaths
        err(path) = immse(original', est);
        profit(path) = immse(original', est); %% tack on a negative sign
 end
+
 end
     
     function gradterm = computeGrad(y, data, est,paranum)

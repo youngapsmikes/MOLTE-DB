@@ -27,7 +27,7 @@ epsilon = 1e-8;
 namerule = func2str(steprule);
 
 switch(namerule) 
-    % initialize parameters for BAKF
+    % initialize parameters for stepsize rules 
     case 'BAKF'
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             lambda = tuneparam(1);
@@ -47,14 +47,8 @@ switch(namerule)
         nu = .1;
         v = 1; 
         beta = .05;
-%         lambda = 1;
-%         BAKFalpha = 1; % initial estimate for alpha for BAKF
-%         alpha = 1;
     case 'adam'
-        % initialize parameters for adam
-        % alphanought = .5; 
-        % beta1 = 0.95;
-        % beta2 = 0.95;
+
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             alphanought = tuneparam(1);
         else 
@@ -75,8 +69,6 @@ switch(namerule)
         vpast = 10;
         
     case 'adagrad'
-        % initialize parameters for adagad
-        % adagradstepsize = 30;
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             adagradstepsize = tuneparam(1);
         else 
@@ -84,7 +76,6 @@ switch(namerule)
         end 
     
     case 'GHS'
-        % initialize parameters for GHS
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             GHSalpha = tuneparam(1);
         else 
@@ -96,9 +87,6 @@ switch(namerule)
             GHStheta = 1;
         end 
    case 'polylearning'
-        % initialize parameters for Polynomial learning rates 
-        % Polyalpha = 2;
-        % Polybeta = 0.8;
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             Polyalpha = tuneparam(1);
         else 
@@ -110,10 +98,7 @@ switch(namerule)
             Polybeta = 0.9;
         end 
   case 'kestens'
-        % initialize parameters for Kestens 
         K = 0;
-        % kestenalpha = 1;
-        % kestentheta = 10;
         if(tuneparam(1) ~= 0 && ~isnan(tuneparam(1)))
             kestenalpha = tuneparam(1);
         else 
